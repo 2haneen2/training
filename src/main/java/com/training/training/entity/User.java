@@ -1,12 +1,12 @@
 package com.training.training.entity;
-
+import java.util.ArrayList;
+import java.util.List;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
 @Table(name = "users")
-
 @Setter
 @Getter
 
@@ -16,7 +16,15 @@ public class User {
     private Long id;
 
     private String name;
-    private String email;
+
+    private String phoneNumber;
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Address> addresses = new ArrayList<>();
+
+   //Soft Delete
+    @Column(nullable = false)
+    private boolean deleted = false;
 
 
 }

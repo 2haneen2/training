@@ -1,63 +1,86 @@
 package com.training.training.service;
-
-import com.training.training.dto.UserRequest;
-import com.training.training.dto.UserResponse;
+import com.training.training.repository.UserCriteriaRepository;
 import com.training.training.exception.UserNotFoundException;
 import com.training.training.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import com.training.training.entity.User;
+import com.training.training.exception.PhoneNumberAlreadyExistsException;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 
 
 @Service
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserCriteriaRepository userCriteriaRepository;
+
     //constructor
-    public UserService(UserRepository userRepository) {
+
+    public UserService(
+            UserRepository userRepository,
+            UserCriteriaRepository userCriteriaRepository) {
+
         this.userRepository = userRepository;
+        this.userCriteriaRepository = userCriteriaRepository;
     }
+
     //******************************************  Add User  **********************************************************
-    public UserResponse addUser(UserRequest request) {
+    public User addUser(User user) {
 
-        User user = new User();
-
-        user.setName(request.getName());
-        user.setEmail(request.getEmail());
-
-        User savedUser = userRepository.save(user);
-
-        UserResponse response = new UserResponse();
-
-        response.setId(savedUser.getId());
-        response.setName(savedUser.getName());
-        response.setEmail(savedUser.getEmail());
-
-        return response;
+        if (userRepository.existsByPhoneNumberAndDeletedFalse(user.getPhoneNumber())) {
+            throw new PhoneNumberAlreadyExistsException("Phone number already exists");
+        }
+        return userRepository.save(user);
     }
+
     //******************************************  Update User  *********************************************************
-    public UserResponse updateUser( Long id,  UserRequest  request) {
+    public User updateUser(Long id, User request) {
 
-        User existingUser = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id ));
+        User existingUser = userRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+
+        if (userRepository.existsByPhoneNumberAndIdNotAndDeletedFalse(request.getPhoneNumber(), id)) {
+            throw new PhoneNumberAlreadyExistsException("Phone number already exists");
+        }
+
         existingUser.setName(request.getName());
-        existingUser.setEmail(request.getEmail());
+        existingUser.setPhoneNumber(request.getPhoneNumber());
 
-        User savedUser = userRepository.save(existingUser);
-
-        UserResponse response = new UserResponse();
-
-        response.setId(savedUser.getId());
-        response.setName(savedUser.getName());
-        response.setEmail(savedUser.getEmail());
-
-        return response;
+        return userRepository.save(existingUser);
     }
+
     //******************************************  Delete User  *********************************************************
     public void deleteUser(Long id) {
-        User existingUser = userRepository.findById(id).orElseThrow(() ->new UserNotFoundException("User not found with id: " + id ));
-        userRepository.delete(existingUser);
+
+        User existingUser = userRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+
+        existingUser.setDeleted(true);
+        userRepository.save(existingUser);
     }
 
-    public boolean existsUser(Long id) {
-        return userRepository.existsById(id);
+    public User getUser(Long id) {
+
+        return userRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
     }
+
+    public List<User> getAllActiveUsersWithAddresses() {
+        return userRepository.findAllActiveUsersWithAddresses();
+    }
+
+    public List<User> getUsersByCityWithAddresses(String city) {
+        return userRepository.findByCityWithAddresses(city);
+    }
+
+    public List<User> getActiveUsersByPhonePrefix(String prefix) {
+        return userRepository.findActiveUsersByPhonePrefix(prefix);
+    }
+
+    public List<User> searchActiveUsers(String name,String phonePrefix) {
+
+        return userCriteriaRepository.searchActiveUsers(name,phonePrefix);
+    }
+
+
+
+
 }
