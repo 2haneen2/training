@@ -102,5 +102,9 @@ public class UserService {
         return userRepository.findAllActiveUsersJpql(pageable);
     }
 
+    public Page<User> getUsersNative(Pageable pageable) {
+        return userRepository.findAllActiveUsersNative(pageable);
+    }
+
 
 }
