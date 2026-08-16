@@ -9,6 +9,8 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import com.training.training.dto.UserWithDetailsDto;
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 @RequestMapping("/users")
@@ -77,6 +79,11 @@ public class UserController {
                 .stream()
                 .map(user -> userMapper.mapToUserDto(user))
                 .toList();
+    }
+    @GetMapping("/pagination/simple")
+    public Page<UserDto> getUsersSimplePagination(Pageable pageable) {
+        return userService.getUsers(pageable)
+                .map(userMapper::mapToUserDto);
     }
 
 
