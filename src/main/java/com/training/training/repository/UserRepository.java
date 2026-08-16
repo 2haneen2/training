@@ -53,4 +53,19 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("prefix") String prefix
     );
 
+    @Query(
+            value = """
+                SELECT u
+                FROM User u
+                WHERE u.deleted = false
+                ORDER BY u.id
+                """,
+            countQuery = """
+                SELECT COUNT(u)
+                FROM User u
+                WHERE u.deleted = false
+                """
+    )
+    Page<User> findAllActiveUsersJpql(Pageable pageable);
+
 }
