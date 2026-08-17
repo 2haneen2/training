@@ -1,0 +1,85 @@
+package com.training.training.controller;
+
+import com.training.training.dto.UpdateUserRequest;
+import com.training.training.dto.UserDto;
+import com.training.training.entity.User;
+import com.training.training.mapper.UserMapper;
+import com.training.training.service.UserService;
+import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.*;
+import com.training.training.dto.UserWithDetailsDto;
+import java.util.List;
+
+@RestController
+@RequestMapping("/users")
+public class UserController {
+
+    private final UserService userService;
+    private final UserMapper userMapper;
+
+    public UserController(UserService userService, UserMapper userMapper) {
+        this.userService = userService;
+        this.userMapper = userMapper;
+    }
+
+
+    @PostMapping
+    public UserDto createUser(@Valid @RequestBody UpdateUserRequest request) {
+
+        User user = userMapper.mapToUser(request);
+        User createdUser = userService.createUser(user);
+
+        return userMapper.mapToUserDto(createdUser);
+    }
+
+    @PutMapping("/{id}")
+    public UserDto updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateUserRequest request) {
+
+        User updatedUser = userMapper.mapToUser(request);
+        User savedUser = userService.updateUser(id, updatedUser);
+
+        return userMapper.mapToUserDto(savedUser);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+    }
+
+
+    @GetMapping("/{id}")
+    public UserDto getUser(@PathVariable Long id) {
+        User user = userService.getUser(id);
+        return userMapper.mapToUserDto(user);
+    }
+
+    @GetMapping("/details")
+    public List<UserWithDetailsDto> getAllUsersWithAddresses() {
+
+        List<User> users = userService.getAllActiveUsersWithAddresses();
+
+        return users.stream()
+                .map(user -> userMapper.mapToUserWithDetailsDto(user))
+                .toList();
+    }
+
+
+
+    @GetMapping("/search")
+    public List<UserDto> searchUsers(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String phonePrefix,
+            @RequestParam(required = false) String city) {
+
+        return userService.searchActiveUsers(name, phonePrefix, city)
+                .stream()
+                .map(user -> userMapper.mapToUserDto(user))
+                .toList();
+    }
+
+
+
+
+}
