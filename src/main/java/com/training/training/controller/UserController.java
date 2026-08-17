@@ -1,13 +1,13 @@
 package com.training.training.controller;
 
-import com.training.training.dto.UserRequest;
-import com.training.training.dto.UserResponse;
+import com.training.training.dto.UpdateUserRequest;
+import com.training.training.dto.UserDto;
 import com.training.training.entity.User;
 import com.training.training.mapper.UserMapper;
 import com.training.training.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
-import com.training.training.dto.UserWithAddressesResponse;
+import com.training.training.dto.UserWithDetailsDto;
 import java.util.List;
 
 @RestController
@@ -24,23 +24,23 @@ public class UserController {
 
 
     @PostMapping
-    public UserResponse addUser(@Valid @RequestBody UserRequest request) {
+    public UserDto createUser(@Valid @RequestBody UpdateUserRequest request) {
 
-        User user = userMapper.toEntity(request);
-        User savedUser = userService.addUser(user);
+        User user = userMapper.mapToUser(request);
+        User createdUser = userService.createUser(user);
 
-        return userMapper.toResponse(savedUser);
+        return userMapper.mapToUserDto(createdUser);
     }
 
     @PutMapping("/{id}")
-    public UserResponse updateUser(
+    public UserDto updateUser(
             @PathVariable Long id,
-            @Valid @RequestBody UserRequest request) {
+            @Valid @RequestBody UpdateUserRequest request) {
 
-        User updatedUser = userMapper.toEntity(request);
+        User updatedUser = userMapper.mapToUser(request);
         User savedUser = userService.updateUser(id, updatedUser);
 
-        return userMapper.toResponse(savedUser);
+        return userMapper.mapToUserDto(savedUser);
     }
 
     @DeleteMapping("/{id}")
@@ -50,49 +50,32 @@ public class UserController {
 
 
     @GetMapping("/{id}")
-    public UserResponse getUser(@PathVariable Long id) {
+    public UserDto getUser(@PathVariable Long id) {
         User user = userService.getUser(id);
-        return userMapper.toResponse(user);
+        return userMapper.mapToUserDto(user);
     }
-    @GetMapping("/with-addresses")
-    public List<UserWithAddressesResponse> getAllUsersWithAddresses() {
+
+    @GetMapping("/details")
+    public List<UserWithDetailsDto> getAllUsersWithAddresses() {
 
         List<User> users = userService.getAllActiveUsersWithAddresses();
 
         return users.stream()
-                .map(user -> userMapper.toWithAddressesResponse(user))
+                .map(user -> userMapper.mapToUserWithDetailsDto(user))
                 .toList();
     }
 
-
-    @GetMapping("/by-city")
-    public List<UserWithAddressesResponse> getUsersByCity(@RequestParam String city) {
-
-        return userService.getUsersByCityWithAddresses(city)
-                .stream()
-                .map(user -> userMapper.toWithAddressesResponse(user))
-                .toList();
-    }
-
-    @GetMapping("/by-phone-prefix")
-    public List<UserResponse> getUsersByPhonePrefix(
-            @RequestParam String prefix) {
-
-        return userService.getActiveUsersByPhonePrefix(prefix)
-                .stream()
-                .map(user -> userMapper.toResponse(user))
-                .toList();
-    }
 
 
     @GetMapping("/search")
-    public List<UserResponse> searchUsers(
+    public List<UserDto> searchUsers(
             @RequestParam(required = false) String name,
-            @RequestParam(required = false) String phonePrefix) {
+            @RequestParam(required = false) String phonePrefix,
+            @RequestParam(required = false) String city) {
 
-        return userService.searchActiveUsers(name, phonePrefix)
+        return userService.searchActiveUsers(name, phonePrefix, city)
                 .stream()
-                .map(user -> userMapper.toResponse(user))
+                .map(user -> userMapper.mapToUserDto(user))
                 .toList();
     }
 

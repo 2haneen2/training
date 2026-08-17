@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class AddressResponse {
+public class AddressDto {
 
     private Long id;
     private String city;

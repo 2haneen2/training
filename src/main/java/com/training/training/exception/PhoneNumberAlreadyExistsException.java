@@ -1,9 +1,14 @@
 package com.training.training.exception;
 
+import lombok.Getter;
+
+@Getter
 public class PhoneNumberAlreadyExistsException extends RuntimeException {
 
-    public PhoneNumberAlreadyExistsException(String message) {
+    private final String phoneNumber;
 
-        super(message);
+    public PhoneNumberAlreadyExistsException(String phoneNumber) {
+        super("Phone number already exists");
+        this.phoneNumber = phoneNumber;
     }
 }

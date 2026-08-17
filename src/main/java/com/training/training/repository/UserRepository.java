@@ -13,9 +13,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
 
     //************************************ - Derived Query - *****************************************************
-    boolean existsByPhoneNumberAndDeletedFalse(String phoneNumber);
+    Boolean existsByPhoneNumberAndDeletedFalse(String phoneNumber);
 
-    boolean existsByPhoneNumberAndIdNotAndDeletedFalse(String phoneNumber,Long id);
+    Boolean existsByPhoneNumberAndIdNotAndDeletedFalse(String phoneNumber,Long id);
 
     Optional<User> findByIdAndDeletedFalse(Long id);
 
@@ -31,7 +31,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
        SELECT DISTINCT u
        FROM User u
        JOIN FETCH u.addresses a
-       WHERE LOWER(a.city) = LOWER(:city)
+       WHERE a.city ILIKE :city
        AND u.deleted = false
        AND a.deleted = false
        """)
@@ -41,7 +41,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(value = """
        SELECT *
-       FROM users
+       FROM user
        WHERE deleted = false
        AND phone_number LIKE CONCAT(:prefix, '%')
        """, nativeQuery = true)

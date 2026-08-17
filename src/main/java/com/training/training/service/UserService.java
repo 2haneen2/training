@@ -1,11 +1,11 @@
 package com.training.training.service;
-import com.training.training.repository.UserCriteriaRepository;
+import com.training.training.repository.UserCustomRepository;
 import com.training.training.exception.UserNotFoundException;
 import com.training.training.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import com.training.training.entity.User;
 import com.training.training.exception.PhoneNumberAlreadyExistsException;
-import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 
@@ -13,23 +13,25 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final UserCriteriaRepository userCriteriaRepository;
+    private final UserCustomRepository userCustomRepository;
 
     //constructor
 
     public UserService(
             UserRepository userRepository,
-            UserCriteriaRepository userCriteriaRepository) {
+            UserCustomRepository userCustomRepository) {
 
         this.userRepository = userRepository;
-        this.userCriteriaRepository = userCriteriaRepository;
+        this.userCustomRepository = userCustomRepository;
     }
 
     //******************************************  Add User  **********************************************************
-    public User addUser(User user) {
+    public User createUser(User user) {
 
         if (userRepository.existsByPhoneNumberAndDeletedFalse(user.getPhoneNumber())) {
-            throw new PhoneNumberAlreadyExistsException("Phone number already exists");
+            throw new PhoneNumberAlreadyExistsException(
+                    user.getPhoneNumber()
+            );
         }
         return userRepository.save(user);
     }
@@ -37,10 +39,12 @@ public class UserService {
     //******************************************  Update User  *********************************************************
     public User updateUser(Long id, User request) {
 
-        User existingUser = userRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+        User existingUser = userRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new UserNotFoundException(id));
 
         if (userRepository.existsByPhoneNumberAndIdNotAndDeletedFalse(request.getPhoneNumber(), id)) {
-            throw new PhoneNumberAlreadyExistsException("Phone number already exists");
+            throw new PhoneNumberAlreadyExistsException(
+                    request.getPhoneNumber()
+            );
         }
 
         existingUser.setName(request.getName());
@@ -52,7 +56,7 @@ public class UserService {
     //******************************************  Delete User  *********************************************************
     public void deleteUser(Long id) {
 
-        User existingUser = userRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+        User existingUser = userRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new UserNotFoundException(id));
 
         existingUser.setDeleted(true);
         userRepository.save(existingUser);
@@ -60,7 +64,8 @@ public class UserService {
 
     public User getUser(Long id) {
 
-        return userRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new UserNotFoundException("User not found with id: " + id));
+        return userRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
     }
 
     public List<User> getAllActiveUsersWithAddresses() {
@@ -75,9 +80,16 @@ public class UserService {
         return userRepository.findActiveUsersByPhonePrefix(prefix);
     }
 
-    public List<User> searchActiveUsers(String name,String phonePrefix) {
+    public List<User> searchActiveUsers(
+            String name,
+            String phonePrefix,
+            String city) {
 
-        return userCriteriaRepository.searchActiveUsers(name,phonePrefix);
+        return userCustomRepository.searchActiveUsers(
+                name,
+                phonePrefix,
+                city
+        );
     }
 
 

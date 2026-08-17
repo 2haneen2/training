@@ -1,9 +1,14 @@
 package com.training.training.exception;
 
+import lombok.Getter;
+
+@Getter
 public class UserNotFoundException extends RuntimeException {
 
-    public UserNotFoundException(String message){
+    private final Long userId;
 
-        super(message);
+    public UserNotFoundException(Long userId) {
+        super("User not found with id: " + userId);
+        this.userId = userId;
     }
 }

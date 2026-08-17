@@ -5,10 +5,10 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-public class UserWithAddressesResponse {
+public class UserWithDetailsDto {
 
     private Long id;
     private String name;
     private String phoneNumber;
-    private List<AddressResponse> addresses;
+    private List<AddressDto> addresses;
 }

@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UserRequest {
+public class UpdateUserRequest {
 
     @NotBlank(message = "Name is required")
     private String name;
