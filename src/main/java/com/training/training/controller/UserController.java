@@ -86,6 +86,12 @@ public class UserController {
                 .map(userMapper::mapToUserDto);
     }
 
+    @GetMapping("/pagination/jpql")
+    public Page<UserDto> getUsersJpqlPagination(Pageable pageable) {
+        return userService.getUsersJpql(pageable)
+                .map(userMapper::mapToUserDto);
+    }
+
 
 
 

@@ -98,7 +98,9 @@ public class UserService {
         return userRepository.findAllByDeletedFalse(pageable);
     }
 
-
+    public Page<User> getUsersJpql(Pageable pageable) {
+        return userRepository.findAllActiveUsersJpql(pageable);
+    }
 
 
 }
