@@ -92,6 +92,12 @@ public class UserController {
                 .map(userMapper::mapToUserDto);
     }
 
+    @GetMapping("/pagination/native")
+    public Page<UserDto> getUsersNativePagination(Pageable pageable) {
+        return userService.getUsersNative(pageable)
+                .map(userMapper::mapToUserDto);
+    }
+
 
 
 

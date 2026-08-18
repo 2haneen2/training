@@ -68,4 +68,20 @@ public interface UserRepository extends JpaRepository<User, Long> {
     )
     Page<User> findAllActiveUsersJpql(Pageable pageable);
 
+    @Query(
+            value = """
+                SELECT *
+                FROM users
+                WHERE deleted = false
+                ORDER BY id
+                """,
+            countQuery = """
+                SELECT COUNT(*)
+                FROM users
+                WHERE deleted = false
+                """,
+            nativeQuery = true
+    )
+    Page<User> findAllActiveUsersNative(Pageable pageable);
+
 }
