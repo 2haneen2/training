@@ -98,6 +98,12 @@ public class UserController {
                 .map(userMapper::mapToUserDto);
     }
 
+    @GetMapping("/pagination/criteria")
+    public Page<UserDto> getUsersCriteriaPagination(Pageable pageable) {
+        return userService.getUsersCriteria(pageable)
+                .map(userMapper::mapToUserDto);
+    }
+
 
 
 

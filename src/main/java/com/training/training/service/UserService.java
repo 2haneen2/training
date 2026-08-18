@@ -106,5 +106,9 @@ public class UserService {
         return userRepository.findAllActiveUsersNative(pageable);
     }
 
+    public Page<User> getUsersCriteria(Pageable pageable) {
+        return userCustomRepository.findAllActiveUsersPage(pageable);
+    }
+
 
 }

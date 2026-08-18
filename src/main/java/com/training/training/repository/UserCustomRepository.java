@@ -10,9 +10,12 @@ import com.training.training.entity.Address;
 import jakarta.persistence.criteria.Join;
 import org.springframework.util.StringUtils;
 import org.hibernate.query.criteria.HibernateCriteriaBuilder;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.persistence.criteria.CriteriaBuilder;
 
 @Repository
 public class UserCustomRepository {
@@ -91,5 +94,36 @@ public class UserCustomRepository {
 
         return entityManager.createQuery(criteriaQuery)
                 .getResultList();
+    }
+
+    public Page<User> findAllActiveUsersPage(Pageable pageable) {
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+
+        CriteriaQuery<User> dataQuery =
+                criteriaBuilder.createQuery(User.class);
+
+        Root<User> userRoot = dataQuery.from(User.class);
+
+        dataQuery.select(userRoot)
+                .where(criteriaBuilder.isFalse(userRoot.get("deleted")))
+                .orderBy(criteriaBuilder.asc(userRoot.get("id")));
+
+        List<User> users = entityManager.createQuery(dataQuery)
+                .setFirstResult((int) pageable.getOffset())
+                .setMaxResults(pageable.getPageSize())
+                .getResultList();
+
+        CriteriaQuery<Long> countQuery =
+                criteriaBuilder.createQuery(Long.class);
+
+        Root<User> countRoot = countQuery.from(User.class);
+
+        countQuery.select(criteriaBuilder.count(countRoot))
+                .where(criteriaBuilder.isFalse(countRoot.get("deleted")));
+
+        long total = entityManager.createQuery(countQuery)
+                .getSingleResult();
+
+        return new PageImpl<>(users, pageable, total);
     }
 }
