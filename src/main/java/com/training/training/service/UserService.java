@@ -7,6 +7,8 @@ import com.training.training.entity.User;
 import com.training.training.exception.PhoneNumberAlreadyExistsException;
 
 import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 
 @Service
@@ -90,6 +92,10 @@ public class UserService {
                 phonePrefix,
                 city
         );
+    }
+
+    public Page<User> getUsers(Pageable pageable) {
+        return userRepository.findAllByDeletedFalse(pageable);
     }
 
 
