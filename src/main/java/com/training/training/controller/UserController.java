@@ -104,6 +104,13 @@ public class UserController {
                 .map(userMapper::mapToUserDto);
     }
 
+    @GetMapping("/pagination/join-fetch")
+    public Page<UserWithDetailsDto> getUsersJoinFetchPagination(
+            Pageable pageable) {
+        return userService.getUsersJoinFetch(pageable)
+                .map(userMapper::mapToUserWithDetailsDto);
+    }
+
 
 
 

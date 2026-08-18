@@ -9,6 +9,7 @@ import com.training.training.exception.PhoneNumberAlreadyExistsException;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageImpl;
 
 
 @Service
@@ -108,6 +109,27 @@ public class UserService {
 
     public Page<User> getUsersCriteria(Pageable pageable) {
         return userCustomRepository.findAllActiveUsersPage(pageable);
+    }
+
+    public Page<User> getUsersJoinFetch(Pageable pageable) {
+        Page<Long> idsPage = userRepository.findActiveUserIds(pageable);
+
+        if (!idsPage.hasContent()) {
+            return new PageImpl<>(
+                    List.of(),
+                    pageable,
+                    idsPage.getTotalElements()
+            );
+        }
+
+        List<User> users =
+                userRepository.findUsersWithAddressesByIds(idsPage.getContent());
+
+        return new PageImpl<>(
+                users,
+                pageable,
+                idsPage.getTotalElements()
+        );
     }
 
 

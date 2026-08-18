@@ -45,7 +45,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(value = """
        SELECT *
-       FROM user
+       FROM app_user
        WHERE deleted = false
        AND phone_number LIKE CONCAT(:prefix, '%')
        """, nativeQuery = true)
@@ -71,17 +71,43 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query(
             value = """
                 SELECT *
-                FROM users
+                FROM app_user
                 WHERE deleted = false
                 ORDER BY id
                 """,
             countQuery = """
                 SELECT COUNT(*)
-                FROM users
+                FROM app_user
                 WHERE deleted = false
                 """,
             nativeQuery = true
     )
     Page<User> findAllActiveUsersNative(Pageable pageable);
+
+    @Query(
+            value = """
+                SELECT u.id
+                FROM User u
+                WHERE u.deleted = false
+                ORDER BY u.id
+                """,
+            countQuery = """
+                SELECT COUNT(u)
+                FROM User u
+                WHERE u.deleted = false
+                """
+    )
+    Page<Long> findActiveUserIds(Pageable pageable);
+
+    @Query("""
+        SELECT DISTINCT u
+        FROM User u
+        LEFT JOIN FETCH u.addresses
+        WHERE u.id IN :ids
+        ORDER BY u.id
+        """)
+    List<User> findUsersWithAddressesByIds(
+            @Param("ids") List<Long> ids
+    );
 
 }
