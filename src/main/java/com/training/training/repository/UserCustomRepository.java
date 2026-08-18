@@ -70,7 +70,7 @@ public class UserCustomRepository {
         if (StringUtils.hasText(city)) {
 
             Join<User, Address> addressJoin =
-                    userRoot.join("address");
+                    userRoot.join("addresses");
 
             predicates.add(
                     criteriaBuilder.ilike(
