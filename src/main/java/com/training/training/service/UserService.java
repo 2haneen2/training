@@ -5,11 +5,12 @@ import com.training.training.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import com.training.training.entity.User;
 import com.training.training.exception.PhoneNumberAlreadyExistsException;
-
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.transaction.annotation.Transactional;
+
 
 
 @Service
@@ -29,6 +30,7 @@ public class UserService {
     }
 
     //******************************************  Add User  **********************************************************
+    @Transactional
     public User createUser(User user) {
 
         if (userRepository.existsByPhoneNumberAndDeletedFalse(user.getPhoneNumber())) {
@@ -40,16 +42,19 @@ public class UserService {
     }
 
     //******************************************  Update User  *********************************************************
+    @Transactional
     public User updateUser(Long id, User request) {
 
-        User existingUser = userRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new UserNotFoundException(id));
+        User existingUser = userRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new UserNotFoundException(id));
 
-        if (userRepository.existsByPhoneNumberAndIdNotAndDeletedFalse(request.getPhoneNumber(), id)) {
+        if (userRepository.existsByPhoneNumberAndIdNotAndDeletedFalse(
+                request.getPhoneNumber(), id)) {
+
             throw new PhoneNumberAlreadyExistsException(
                     request.getPhoneNumber()
             );
         }
-
         existingUser.setName(request.getName());
         existingUser.setPhoneNumber(request.getPhoneNumber());
 
@@ -57,6 +62,7 @@ public class UserService {
     }
 
     //******************************************  Delete User  *********************************************************
+    @Transactional
     public void deleteUser(Long id) {
 
         User existingUser = userRepository.findByIdAndDeletedFalse(id).orElseThrow(() -> new UserNotFoundException(id));
